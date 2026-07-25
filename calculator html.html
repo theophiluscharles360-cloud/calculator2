@@ -1,0 +1,180 @@
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Calculator</title>
+<style>
+  :root {
+    --bg: #1b1d23;
+    --panel: #24262e;
+    --display: #14161b;
+    --text: #f2f2f0;
+    --muted: #8b8e98;
+    --accent: #5b8cff;
+    --accent-dim: #3a5bcc;
+    --op: #2e3140;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }
+  .calculator {
+    width: 320px;
+    background: var(--panel);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  }
+  .display {
+    background: var(--display);
+    border-radius: 12px;
+    padding: 24px 18px 16px;
+    margin-bottom: 16px;
+    text-align: right;
+    overflow: hidden;
+  }
+  .history {
+    color: var(--muted);
+    font-size: 14px;
+    min-height: 18px;
+  }
+  .current {
+    color: var(--text);
+    font-size: 40px;
+    font-weight: 300;
+    word-break: break-all;
+  }
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  button {
+    border: none;
+    border-radius: 12px;
+    padding: 18px 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--op);
+    cursor: pointer;
+    transition: transform 0.05s ease, filter 0.15s ease;
+  }
+  button:hover { filter: brightness(1.15); }
+  button:active { transform: scale(0.95); }
+  .num { background: #2c2f38; }
+  .op { background: var(--op); color: var(--accent); }
+  .equals { background: var(--accent); color: white; }
+  .clear, .sign, .percent { background: #3a3d47; color: var(--muted); font-size: 16px; }
+  .zero { grid-column: span 2; }
+</style>
+</head>
+<body>
+
+<div class="calculator">
+  <div class="display">
+    <div class="history" id="history">&nbsp;</div>
+    <div class="current" id="current">0</div>
+  </div>
+  <div class="buttons">
+    <button class="clear" onclick="clearAll()">AC</button>
+    <button class="sign" onclick="toggleSign()">+/-</button>
+    <button class="percent" onclick="percent()">%</button>
+    <button class="op" onclick="setOp('÷')">÷</button>
+
+    <button class="num" onclick="inputDigit('7')">7</button>
+    <button class="num" onclick="inputDigit('8')">8</button>
+    <button class="num" onclick="inputDigit('9')">9</button>
+    <button class="op" onclick="setOp('×')">×</button>
+
+    <button class="num" onclick="inputDigit('4')">4</button>
+    <button class="num" onclick="inputDigit('5')">5</button>
+    <button class="num" onclick="inputDigit('6')">6</button>
+    <button class="op" onclick="setOp('−')">−</button>
+
+    <button class="num" onclick="inputDigit('1')">1</button>
+    <button class="num" onclick="inputDigit('2')">2</button>
+    <button class="num" onclick="inputDigit('3')">3</button>
+    <button class="op" onclick="setOp('+')">+</button>
+
+    <button class="num zero" onclick="inputDigit('0')">0</button>
+    <button class="num" onclick="inputDigit('.')">.</button>
+    <button class="equals" onclick="calculate()">=</button>
+  </div>
+</div>
+
+<script>
+  let current = '0';
+  let previous = null;
+  let operator = null;
+  let resetNext = false;
+
+  const currentEl = document.getElementById('current');
+  const historyEl = document.getElementById('history');
+
+  function updateDisplay() {
+    currentEl.textContent = current;
+    historyEl.textContent = previous !== null ? `${previous} ${operator}` : '\u00A0';
+  }
+
+  function inputDigit(d) {
+    if (resetNext) { current = '0'; resetNext = false; }
+    if (d === '.' && current.includes('.')) return;
+    current = (current === '0' && d !== '.') ? d : current + d;
+    updateDisplay();
+  }
+
+  function setOp(op) {
+    if (operator && !resetNext) calculate();
+    previous = current;
+    operator = op;
+    resetNext = true;
+    updateDisplay();
+  }
+
+  function calculate() {
+    if (operator === null || previous === null) return;
+    const a = parseFloat(previous);
+    const b = parseFloat(current);
+    let result;
+    switch (operator) {
+      case '+': result = a + b; break;
+      case '−': result = a - b; break;
+      case '×': result = a * b; break;
+      case '÷': result = b === 0 ? NaN : a / b; break;
+    }
+    current = String(Number(result.toFixed(10)));
+    operator = null;
+    previous = null;
+    resetNext = true;
+    updateDisplay();
+  }
+
+  function clearAll() {
+    current = '0';
+    previous = null;
+    operator = null;
+    resetNext = false;
+    updateDisplay();
+  }
+
+  function toggleSign() {
+    current = String(parseFloat(current) * -1);
+    updateDisplay();
+  }
+
+  function percent() {
+    current = String(parseFloat(current) / 100);
+    updateDisplay();
+  }
+
+  updateDisplay();
+</script>
+
+</body>
+</html>
